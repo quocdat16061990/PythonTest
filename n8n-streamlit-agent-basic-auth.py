@@ -12,7 +12,7 @@ def rfile(name_file):
 
 
 # Constants
-WEBHOOK_URL = "https://n8n.srv819221.hstgr.cloud/webhook-test/7ada3e17-dd16-4a9d-8ec4-27c126e4558f"
+WEBHOOK_URL = "https://n8n.srv819221.hstgr.cloud/webhook/7ada3e17-dd16-4a9d-8ec4-27c126e4558f"
 BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTk2M2UzMy1kNGQ0LTQ5NjgtYjBkNi0wODQ3YjZiZGNmYTYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ4MDY3ODE3LCJleHAiOjE3NTA2Mjk2MDB9.GV_y7e_g8k6oqfXZO-Sjm7RA7_Gz25TsJW8lxhZob5M"
 
 
