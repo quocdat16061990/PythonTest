@@ -57,7 +57,7 @@ def display_output(output):
     # Trích xuất văn bản và hình ảnh
     text = extract_text(output)
     image_url = extract_image_url(output)
-
+    
     # Hiển thị văn bản phân tích
     st.markdown(text, unsafe_allow_html=True)
     
@@ -73,7 +73,27 @@ def display_output(output):
         )
    
 
+
 def main():
+    # CSS cho styling chat
+    st.markdown("""
+    <style>
+    .user {
+        
+        padding: 10px;
+        border-radius: 10px;
+        margin: 5px 0;
+        text-align: right;
+    }
+    .assistant {
+        
+        padding: 10px;
+        border-radius: 10px;
+        margin: 5px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Hiển thị logo (nếu có)
     try:
         col1, col2, col3 = st.columns([3, 2, 3])
@@ -87,9 +107,8 @@ def main():
         with open("00.xinchao.txt", "r", encoding="utf-8") as file:
             title_content = file.read()
     except Exception as e:
-            title_content = "Lỗi đọc tiêu đề"
+        title_content = "Trợ lý AI"
 
-    print("title_content:", title_content)
     st.markdown(
         f"""<h1 style="text-align: center; font-size: 24px;">{title_content}</h1>""",
         unsafe_allow_html=True
@@ -103,22 +122,31 @@ def main():
 
     # Hiển thị lịch sử tin nhắn
     for message in st.session_state.messages:
-        if message["role"] == "assistant":
-            st.markdown(f'<div class="assistant">{message["content"]}</div>', unsafe_allow_html=True)
-        elif message["role"] == "user":
+        if message["role"] == "user":
             st.markdown(f'<div class="user">{message["content"]}</div>', unsafe_allow_html=True)
+        elif message["role"] == "assistant":
+            display_output(message["content"])
 
     # Ô nhập liệu cho người dùng
     if prompt := st.chat_input("Nhập nội dung cần trao đổi ở đây nhé?"):
+        # Lưu tin nhắn của user vào session state
         st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Hiển thị tin nhắn user vừa gửi
+        st.markdown(f'<div class="user">{prompt}</div>', unsafe_allow_html=True)
 
         # Gửi yêu cầu đến LLM và nhận phản hồi
         with st.spinner("Đang chờ phản hồi từ AI..."):
             llm_response = send_message_to_llm(st.session_state.session_id, prompt)
 
-        # Hiển thị phân tích kỹ thuật và hình ảnh (nếu có)
-        display_output(llm_response)  # Trực tiếp truyền "output" từ LLM
+        # Lưu phản hồi của AI vào session state
+        st.session_state.messages.append({"role": "assistant", "content": llm_response})
+        
+        # Hiển thị phản hồi của AI
+        display_output(llm_response)
 
+        # Rerun để cập nhật giao diện
+        st.rerun()
 
 if __name__ == "__main__":
     main()
