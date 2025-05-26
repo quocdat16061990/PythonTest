@@ -71,8 +71,7 @@ def display_output(output):
             """,
             unsafe_allow_html=True
         )
-    else:
-        st.write("Không tìm thấy hình ảnh.")
+   
 
 def main():
     # Hiển thị logo (nếu có)
