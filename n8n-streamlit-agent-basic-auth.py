@@ -57,10 +57,6 @@ def display_output(output):
     # Trích xuất văn bản và hình ảnh
     text = extract_text(output)
     image_url = extract_image_url(output)
-    
-    # Hiển thị văn bản phân tích
-    st.markdown(text, unsafe_allow_html=True)
-    
     # Nếu tìm thấy URL hình ảnh, hiển thị hình ảnh và cho phép bấm vào
     if image_url:
         st.markdown(
@@ -72,6 +68,10 @@ def display_output(output):
             unsafe_allow_html=True
         )
    
+    # Hiển thị văn bản phân tích
+    st.markdown(text, unsafe_allow_html=True)
+    
+    
 
 
 def main():
