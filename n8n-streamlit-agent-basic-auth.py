@@ -110,6 +110,8 @@ def main():
 
     # Ô nhập liệu cho người dùng
     if prompt := st.chat_input("Nhập nội dung cần trao đổi ở đây nhé?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
         # Gửi yêu cầu đến LLM và nhận phản hồi
         with st.spinner("Đang chờ phản hồi từ AI..."):
             llm_response = send_message_to_llm(st.session_state.session_id, prompt)
