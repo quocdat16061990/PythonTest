@@ -11,8 +11,8 @@ def rfile(name_file):
             st.error(f"File {name_file} không tồn tại.")
 
 # Constants
-BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTk2M2UzMy1kNGQ0LTQ5NjgtYjBkNi0wODQ3YjZiZGNmYTYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5MTQwNTQ0LCJleHAiOjE3NTE2NjY0MDB9.2P4u1uJa4qe6Hk2fpt23hUqfz1r5KSUlcgiZ4xapXiY"
-WEBHOOK_URL = "https://n8n.srv819221.hstgr.cloud/webhook-test/463769d0-6109-45f3-9f88-78909c8486d9"
+BEARER_TOKEN = st.secrets.get("BEARER_TOKEN")
+WEBHOOK_URL = st.secrets.get("WEBHOOK_URL")
 
 
 # # Khởi tạo tin nhắn "system" và "assistant"
