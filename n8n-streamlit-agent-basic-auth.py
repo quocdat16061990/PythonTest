@@ -14,13 +14,13 @@ def rfile(name_file):
 BEARER_TOKEN = st.secrets.get("BEARER_TOKEN")
 WEBHOOK_URL = st.secrets.get("WEBHOOK_URL")
 
+
 # # Khởi tạo tin nhắn "system" và "assistant"
 # INITIAL_SYSTEM_MESSAGE = {"role": "system", "content": rfile("01.system_trainning.txt")}
 # INITIAL_ASSISTANT_MESSAGE = {"role": "assistant", "content": rfile("02.assistant.txt")}
 
 # if "messages" not in st.session_state:
 #     st.session_state.messages = [INITIAL_SYSTEM_MESSAGE, INITIAL_ASSISTANT_MESSAGE]
-
 
 
 def generate_session_id():
@@ -40,11 +40,13 @@ def send_message_to_llm(session_id, message):
         print("Request payload:", payload)  # In ra payload gửi đi
         response.raise_for_status()
         response_data = response.json()
-        print("Full response:", response_data) 
+        print("Full response:", response_data)  # In ra toàn bộ dữ liệu trả về
         
+        # Trích xuất contract và urlWord
         contract = response_data[0].get('contract', "No contract received")
         urlWord = response_data[0].get('urlWord', "No URL received")
         
+        # Trả về object theo định dạng N8nOutputItems
         return [{"json": {"contract": contract, "urlWord": urlWord}}]
     
     except requests.exceptions.RequestException as e:
@@ -54,8 +56,8 @@ def display_output(output):
     """Hiển thị nội dung hợp đồng và URL file Word"""
     # Lấy contract và urlWord từ output
     contract = output.get('json', {}).get('contract', "No contract received")
-    urlWord = output.get('json', {}).get('urlWord', None)
-    
+    urlWord = output.get('json', {}).get('urlWord',"No file recceived")
+    print("urlWorld: ",urlWord)
     # Hiển thị nội dung hợp đồng
     st.markdown(contract, unsafe_allow_html=True)
     
@@ -95,6 +97,7 @@ def main():
         """,
         unsafe_allow_html=True
     )
+    
     # Hiển thị logo (nếu có)
     try:
         col1, col2, col3 = st.columns([3, 2, 3])
@@ -108,9 +111,8 @@ def main():
         with open("00.xinchao.txt", "r", encoding="utf-8") as file:
             title_content = file.read()
     except Exception as e:
-        title_content = "Lỗi đọc tiêu đề"
+        title_content = "Trợ lý AI"
 
-    print("title_content:", title_content)
     st.markdown(
         f"""<h1 style="text-align: center; font-size: 24px;">{title_content}</h1>""",
         unsafe_allow_html=True
@@ -124,17 +126,23 @@ def main():
 
     # Hiển thị lịch sử tin nhắn
     for message in st.session_state.messages:
-        if message["role"] == "assistant":
-            st.markdown(f'<div class="assistant">{message["content"]}</div>', unsafe_allow_html=True)
-        elif message["role"] == "user":
+        if message["role"] == "user":
             st.markdown(f'<div class="user">{message["content"]}</div>', unsafe_allow_html=True)
+        elif message["role"] == "assistant":
+            display_output(message["content"])
 
     # Ô nhập liệu cho người dùng
     if prompt := st.chat_input("Nhập nội dung cần trao đổi ở đây nhé?"):
+        # Lưu tin nhắn của user vào session state
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Hiển thị tin nhắn user vừa gửi
+        st.markdown(f'<div class="user">{prompt}</div>', unsafe_allow_html=True)
+
         # Gửi yêu cầu đến LLM và nhận phản hồi
         with st.spinner("Đang chờ phản hồi từ AI..."):
             llm_response = send_message_to_llm(st.session_state.session_id, prompt)
-            print('llm_response: ',llm_response)
+
         # Lưu phản hồi của AI vào session state
         st.session_state.messages.append({"role": "assistant", "content": llm_response[0]})
         
