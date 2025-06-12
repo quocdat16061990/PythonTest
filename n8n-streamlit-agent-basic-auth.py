@@ -43,20 +43,20 @@ def send_message_to_llm(session_id, message):
         print("Full response:", response_data)  # In ra toàn bộ dữ liệu trả về
         
         # Trích xuất contract và urlWord
-        contract = response_data.get('contract', "No contract received")
-        urlWord = response_data.get('urlWord', "No URL received")
+        contract = response_data[0].get('contract', "No contract received")
+        url = response_data[0].get('url', "No URL received")
         
         # Trả về object theo định dạng N8nOutputItems
-        return [{"json": {"contract": contract, "urlWord": urlWord}}]
+        return [{"json": {"contract": contract, "url": url}}]
     
     except requests.exceptions.RequestException as e:
-        return [{"json": {"contract": f"Error: Failed to connect to the LLM - {str(e)}", "urlWord": ""}}]
+        return [{"json": {"contract": f"Error: Failed to connect to the LLM - {str(e)}", "url": ""}}]
 
 def display_output(output):
     """Hiển thị nội dung hợp đồng và URL file Word"""
     # Lấy contract và urlWord từ output
     contract = output.get('json', {}).get('contract', "No contract received")
-    urlWord = output.get('json', {}).get('urlWord',"No file recceived")
+    urlWord = output.get('json', {}).get('url',"No file recceived")
     print("urlWorld: ",urlWord)
     # Hiển thị nội dung hợp đồng
     st.markdown(contract, unsafe_allow_html=True)
