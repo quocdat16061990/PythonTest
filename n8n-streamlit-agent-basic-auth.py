@@ -65,10 +65,7 @@ def display_output(output):
         )
 
 def main():
-    st.set_page_config(page_title="Trợ lý AI", page_icon="🤖", layout="centered")
-
-    # Thêm HTML để ghi đè và làm trống meta tags Open Graph
-    st.markdown(
+    st.components.v1.html(
         """
         <head>
             <meta property="og:title" content="">
@@ -77,8 +74,10 @@ def main():
             <meta name="description" content="">
         </head>
         """,
-        unsafe_allow_html=True
+        height=0
     )
+    st.set_page_config(page_title="Trợ lý AI", page_icon="🤖", layout="centered")
+
 
     st.markdown(
         """
