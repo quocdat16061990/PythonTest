@@ -9,7 +9,7 @@ def rfile(name_file):
         with open(name_file, "r", encoding="utf-8") as file:
             return file.read()
     except FileNotFoundError:
-            st.error(f"File {name_file} không tồn tại.")
+        st.error(f"File {name_file} không tồn tại.")
 
 # Constants
 BEARER_TOKEN = st.secrets.get("BEARER_TOKEN")
@@ -29,14 +29,16 @@ def send_message_to_llm(session_id, message):
     }
     try:
         response = requests.post(WEBHOOK_URL, json=payload, headers=headers)
-        print("Request payload:", payload)
+        print("Request payload:", payload)  # In ra payload gửi đi
         response.raise_for_status()
         response_data = response.json()
-        print("Full response:", response_data)
+        print("Full response:", response_data)  # In ra toàn bộ dữ liệu trả về
         
+        # Trích xuất contract và urlWord
         contract = response_data[0].get('contract', "No contract received")
         url = response_data[0].get('url', "No URL received")
         
+        # Trả về object theo định dạng N8nOutputItems
         return [{"json": {"contract": contract, "url": url}}]
     
     except requests.exceptions.RequestException as e:
@@ -44,11 +46,14 @@ def send_message_to_llm(session_id, message):
 
 def display_output(output):
     """Hiển thị nội dung hợp đồng và URL file Word"""
+    # Lấy contract và urlWord từ output
     contract = output.get('json', {}).get('contract', "No contract received")
-    urlWord = output.get('json', {}).get('url',"No file recceived")
-    print("urlWorld: ",urlWord)
+    urlWord = output.get('json', {}).get('url', "No file received")
+    print("urlWord: ", urlWord)
+    # Hiển thị nội dung hợp đồng
     st.markdown(contract, unsafe_allow_html=True)
     
+    # Hiển thị URL file Word nếu có
     if urlWord and urlWord != "No URL received":
         st.markdown(
             f"""
@@ -62,14 +67,18 @@ def display_output(output):
 def main():
     st.set_page_config(page_title="Trợ lý AI", page_icon="🤖", layout="centered")
 
-    # Thêm mã CSS để tùy chỉnh footer
-    st.markdown("""
-        <style>
-            footer {
-                visibility: hidden;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    # Thêm HTML để ghi đè và làm trống meta tags Open Graph
+    st.markdown(
+        """
+        <head>
+            <meta property="og:title" content="">
+            <meta property="og:description" content="">
+            <meta property="og:image" content="">
+            <meta name="description" content="">
+        </head>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown(
         """
@@ -95,6 +104,7 @@ def main():
         unsafe_allow_html=True
     )
     
+    # Hiển thị logo (nếu có)
     try:
         col1, col2, col3 = st.columns([3, 2, 3])
         with col2:
@@ -102,6 +112,7 @@ def main():
     except:
         pass
     
+    # Đọc nội dung tiêu đề từ file
     try:
         with open("00.xinchao.txt", "r", encoding="utf-8") as file:
             title_content = file.read()
@@ -112,3 +123,40 @@ def main():
         f"""<h1 style="text-align: center; font-size: 24px;">{title_content}</h1>""",
         unsafe_allow_html=True
     )
+
+    # Khởi tạo session state
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = generate_session_id()
+
+    # Hiển thị lịch sử tin nhắn
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.markdown(f'<div class="user">{message["content"]}</div>', unsafe_allow_html=True)
+        elif message["role"] == "assistant":
+            display_output(message["content"])
+
+    # Ô nhập liệu cho người dùng
+    if prompt := st.chat_input("Nhập nội dung cần trao đổi ở đây nhé?"):
+        # Lưu tin nhắn của user vào session state
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Hiển thị tin nhắn user vừa gửi
+        st.markdown(f'<div class="user">{prompt}</div>', unsafe_allow_html=True)
+
+        # Gửi yêu cầu đến LLM và nhận phản hồi
+        with st.spinner("Đang chờ phản hồi từ AI..."):
+            llm_response = send_message_to_llm(st.session_state.session_id, prompt)
+
+        # Lưu phản hồi của AI vào session state
+        st.session_state.messages.append({"role": "assistant", "content": llm_response[0]})
+        
+        # Hiển thị phản hồi của AI
+        display_output(llm_response[0])
+
+        # Rerun để cập nhật giao diện
+        st.rerun()
+
+if __name__ == "__main__":
+    main()
