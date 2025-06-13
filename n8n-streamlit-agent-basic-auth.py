@@ -66,20 +66,9 @@ def display_output(output):
 
 def main():
     # Đặt set_page_config() là lệnh đầu tiên
-    st.set_page_config(page_title="Trợ lý AI", page_icon="🤖", layout="centered")
+   
 
-    # Chèn meta tags rỗng ngay sau để cố gắng ghi đè
-    st.components.v1.html(
-        """
-        <head>
-            <meta property="og:title" content="">
-            <meta property="og:description" content="">
-            <meta property="og:image" content="">
-            <meta name="description" content="">
-        </head>
-        """,
-        height=0
-    )
+  
 
     st.markdown(
         """
