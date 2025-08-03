@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import uuid
-import re
+import json
 
 # Hàm đọc nội dung từ file văn bản
 def rfile(name_file):
@@ -44,32 +44,54 @@ def send_message_to_llm(session_id, message):
     except requests.exceptions.RequestException as e:
         return [{"json": {"contract": f"Error: Failed to connect to the LLM - {str(e)}", "url": ""}}]
 
+def format_contract_display(contract):
+    """Format contract data thành dạng đơn giản key: value"""
+    if isinstance(contract, str):
+        try:
+            # Thử parse JSON nếu contract là string
+            contract_data = json.loads(contract)
+        except:
+            # Nếu không parse được, hiển thị như text thường
+            return contract
+    elif isinstance(contract, dict):
+        contract_data = contract
+    else:
+        return str(contract)
+    
+    # Tạo text đơn giản thay vì HTML
+    text_content = []
+    
+    # Duyệt qua tất cả key-value pairs
+    for key, value in contract_data.items():
+        if value and value != "N/A":
+            # Thay _ thành * trong key
+            formatted_key = key.replace('_', ' ')
+            text_content.append(f"{formatted_key} : {value}")
+    
+    return "\n".join(text_content)
+
 def display_output(output):
     """Hiển thị nội dung hợp đồng và URL file Word"""
     # Lấy contract và urlWord từ output
     contract = output.get('json', {}).get('contract', "No contract received")
     urlWord = output.get('json', {}).get('url', "No file received")
     print("urlWord: ", urlWord)
-    # Hiển thị nội dung hợp đồng
-    st.markdown(contract, unsafe_allow_html=True)
+    
+    # Hiển thị nội dung hợp đồng với format đơn giản
+    if contract != "No contract received":
+        formatted_contract = format_contract_display(contract)
+        # Sử dụng st.text hoặc st.code thay vì st.markdown
+        st.code(formatted_contract, language=None)
+    else:
+        st.write("Không có thông tin hợp đồng")
     
     # Hiển thị URL file Word nếu có
     if urlWord and urlWord != "No URL received":
         st.markdown(
-            f"""
-            <a href="{urlWord}" target="_blank" style="color: blue; text-decoration: underline;">
-                Xem file hợp đồng (Word)
-            </a>
-            """,
-            unsafe_allow_html=True
+            f"📄 [Xem file hợp đồng (Google Docs)]({urlWord})"
         )
 
 def main():
-    # Đặt set_page_config() là lệnh đầu tiên
-   
-
-  
-
     st.markdown(
         """
         <style>
@@ -77,14 +99,14 @@ def main():
                 padding: 10px;
                 border-radius: 10px;
                 max-width: 75%;
-                background: none; /* Màu trong suốt */
+                background: none;
                 text-align: left;
             }
             .user {
                 padding: 10px;
                 border-radius: 10px;
                 max-width: 75%;
-                background: none; /* Màu trong suốt */
+                background: none;
                 text-align: right;
                 margin-left: auto;
             }
