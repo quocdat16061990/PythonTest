@@ -63,7 +63,7 @@ def format_contract_display(contract):
     
     # Duyệt qua tất cả key-value pairs
     for key, value in contract_data.items():
-        if value and value != "N/A":
+        if value :
             # Thay _ thành * trong key
             formatted_key = key.replace('_', ' ')
             text_content.append(f"{formatted_key} : {value}")
